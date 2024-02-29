@@ -1,7 +1,14 @@
 package com.zzy.shortLink.admin.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 import java.util.Date;
 
+/**
+ * 由用户持久层实体类
+ */
+@Data
+@TableName("t_user")
 public class UserDO {
     private static final long serialVersionUID = 1L;
 
