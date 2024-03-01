@@ -22,9 +22,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     public UserRespDTO getUserByUsername(String username) {
         LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, username);
         UserDO userDO = baseMapper.selectOne(queryWrapper);
-       if(userDO == null){
-           throw new ClientException(UserErrorCodeEnum.USER_NULL.)
-       }
+        if(userDO == null){
+           throw new ClientException(UserErrorCodeEnum.USER_NULL);
+        }
         UserRespDTO result = new UserRespDTO();
         BeanUtils.copyProperties(userDO, result);
         return result;

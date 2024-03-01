@@ -1,7 +1,6 @@
 package com.zzy.shortLink.admin.common.convention.result;
 
 import com.zzy.shortLink.admin.common.convention.errorcode.BaseErrorCode;
-import com.zzy.shortLink.admin.common.convention.errorcode.IErrorCode;
 import com.zzy.shortLink.admin.common.convention.exception.AbstractException;
 
 import java.util.Optional;
@@ -55,14 +54,5 @@ public final class Results {
         return new Result<Void>()
                 .setCode(errorCode)
                 .setMessage(errorMessage);
-    }
-
-    /**
-     * 通过 errorCode、errorMessage 构建失败响应
-     */
-    public static Result<Void> failure(IErrorCode errorCode) {
-        return new Result<Void>()
-                .setCode(errorCode.code())
-                .setMessage(errorCode.message());
     }
 }
