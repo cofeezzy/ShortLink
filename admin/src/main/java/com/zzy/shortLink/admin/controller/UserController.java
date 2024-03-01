@@ -1,6 +1,8 @@
 package com.zzy.shortLink.admin.controller;
 
 import com.zzy.shortLink.admin.common.convention.result.Result;
+import com.zzy.shortLink.admin.common.convention.result.Results;
+import com.zzy.shortLink.admin.common.enums.UserErrorCodeEnum;
 import com.zzy.shortLink.admin.dto.resp.UserRespDTO;
 import com.zzy.shortLink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,13 @@ public class UserController {
      */
     @GetMapping("/api/shortLink/v1/user/{username}")
     public Result<UserRespDTO> getUserByUsername(@PathVariable("username") String username){
-        return new Result<UserRespDTO>().setCode("0").setData(userService.getUserByUsername(username));
+        UserRespDTO result = userService.getUserByUsername(username);
+        if(result == null){
+            return Results.failure(UserErrorCodeEnum.USER_NULL);
+            //new Result<UserRespDTO>().setCode(UserErrorCodeEnum.USER_NULL.code()).setMessage(UserErrorCodeEnum.USER_NULL.message());
+        }else {
+            return Results.success(result);
+            //Result<UserRespDTO>().setCode("0").setData(result);
+        }
     }
 }
