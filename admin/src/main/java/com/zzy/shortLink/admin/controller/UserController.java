@@ -1,7 +1,9 @@
 package com.zzy.shortLink.admin.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.common.convention.result.Results;
+import com.zzy.shortLink.admin.dto.resp.UserActualRespDTO;
 import com.zzy.shortLink.admin.dto.resp.UserRespDTO;
 import com.zzy.shortLink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +32,15 @@ public class UserController {
             return Results.success(result);
             //Result<UserRespDTO>().setCode("0").setData(result);
         //}
+    }
+
+    /**
+     * 查询用户无脱敏信息
+     * @param username
+     * @return
+     */
+    @GetMapping("/api/shortLink/v1/actual/user/{username}")
+    public Result<UserActualRespDTO> getActualUserByUsername(@PathVariable("username") String username){
+        return Results.success(BeanUtil.toBean(userService.getUserByUsername(username), UserActualRespDTO.class));
     }
 }
