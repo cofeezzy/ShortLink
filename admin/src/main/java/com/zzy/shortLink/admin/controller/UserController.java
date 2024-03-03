@@ -3,14 +3,12 @@ package com.zzy.shortLink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.common.convention.result.Results;
+import com.zzy.shortLink.admin.dto.req.UserRegisterReqDTO;
 import com.zzy.shortLink.admin.dto.resp.UserActualRespDTO;
 import com.zzy.shortLink.admin.dto.resp.UserRespDTO;
 import com.zzy.shortLink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户管理控制层
@@ -47,11 +45,22 @@ public class UserController {
 
     /**
      * 查询用户名是否存在
-     * @param username
-     * @return
+     * @param username 用户名
+     * @return 用户名存在返回True，不存在返回False
      */
     @GetMapping("/api/shortLink/user/has-username")
     public Result<Boolean> hasUsername(@RequestParam("username") String username){
         return Results.success(userService.hasUsername(username));
     }
+
+    /**
+     * 注册用户
+     */
+    @PostMapping("/api/shortLink/v1/user")
+    public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam){
+        userService.Register(requestParam);
+        return Results.success();
+    }
+
+
 }
