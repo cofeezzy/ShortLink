@@ -2,8 +2,12 @@ package com.zzy.shortLink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zzy.shortLink.admin.dao.entity.UserDO;
+import com.zzy.shortLink.admin.dto.req.UserLoginReqDTO;
 import com.zzy.shortLink.admin.dto.req.UserRegisterReqDTO;
+import com.zzy.shortLink.admin.dto.req.UserUpdateReqDTO;
+import com.zzy.shortLink.admin.dto.resp.UserLoginRespDTO;
 import com.zzy.shortLink.admin.dto.resp.UserRespDTO;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * 用户接口层
@@ -31,4 +35,30 @@ public interface UserService extends IService<UserDO> {
      */
     void  Register(UserRegisterReqDTO requestParam);
 
+    /**
+     * 根据用户名修改用户
+     * @param requestParam
+     */
+    void update(@RequestBody UserUpdateReqDTO requestParam);
+
+    /**
+     * 登录
+     * @param requestParam
+     * @return
+     */
+    UserLoginRespDTO login(@RequestBody UserLoginReqDTO requestParam);
+
+    /**
+     * 检查用户是否登录
+     * @param username
+     * @return 用户登录标识
+     */
+    Boolean checkLogin(String username, String token);
+
+    /**
+     * 退出登录
+     * @param username
+     * @param token
+     */
+    void logout(String username, String token);
 }

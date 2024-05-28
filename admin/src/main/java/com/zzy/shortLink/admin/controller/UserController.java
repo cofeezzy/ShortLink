@@ -3,8 +3,11 @@ package com.zzy.shortLink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.common.convention.result.Results;
+import com.zzy.shortLink.admin.dto.req.UserLoginReqDTO;
 import com.zzy.shortLink.admin.dto.req.UserRegisterReqDTO;
+import com.zzy.shortLink.admin.dto.req.UserUpdateReqDTO;
 import com.zzy.shortLink.admin.dto.resp.UserActualRespDTO;
+import com.zzy.shortLink.admin.dto.resp.UserLoginRespDTO;
 import com.zzy.shortLink.admin.dto.resp.UserRespDTO;
 import com.zzy.shortLink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -62,5 +65,42 @@ public class UserController {
         return Results.success();
     }
 
+    /**
+     * update
+     * @param requestParam
+     * @return
+     */
+    @PutMapping("/api/shortLink/v1/user")
+    public Result<Void> update(@RequestBody UserUpdateReqDTO requestParam){
+        userService.update(requestParam);
+        return Results.success();
+    }
+
+    /**
+     * 登录
+     * @param requestParam
+     * @return
+     */
+    @PostMapping("/api/shortLink/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO requestParam){
+        UserLoginRespDTO result = userService.login(requestParam);
+        return Results.success(result);
+    }
+
+    /**
+     * 检查用户是否登录
+     * @param token
+     * @return
+     */
+    @GetMapping("/api/shortLink/v1/user/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token){
+        return Results.success(userService.checkLogin(username, token));
+    }
+
+    @DeleteMapping("/api/shortLink/v1/user/logout")
+    public Result<Void> logout(@RequestParam("username") String username, @RequestParam("token") String token){
+        userService.logout(username, token);
+        return Results.success();
+    }
 
 }

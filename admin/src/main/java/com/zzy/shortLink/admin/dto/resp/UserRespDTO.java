@@ -2,11 +2,15 @@ package com.zzy.shortLink.admin.dto.resp;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zzy.shortLink.admin.common.serialize.PhoneDesensitizationSerializer;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用户返回参数响应
  */
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class UserRespDTO {
     /**
