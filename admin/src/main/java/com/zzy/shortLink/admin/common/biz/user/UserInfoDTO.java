@@ -1,5 +1,6 @@
 package com.zzy.shortLink.admin.common.biz.user;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class UserInfoDTO {
     /**
      * 用户 ID
      */
+    @JSONField(name = "id")
     private String userId;
 
     /**
