@@ -3,6 +3,7 @@ package com.zzy.shortLink.admin.controller;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.common.convention.result.Results;
 import com.zzy.shortLink.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.zzy.shortLink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.zzy.shortLink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.zzy.shortLink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.zzy.shortLink.admin.service.GroupService;
@@ -46,13 +47,21 @@ public class GroupController {
         return Results.success();
     }
 
-
     /**
      * 删除短链接分组名
      */
     @DeleteMapping("/api/short-link/v1/group")
     public Result<Void> update(@RequestParam String gid){
         groupService.deleteGroup(gid);
+        return Results.success();
+    }
+
+    /**
+     * 修改短链接排序
+     */
+    @PostMapping("/api/short-link/v1/group/sort")
+    public Result<Void> sortGroup(@RequestBody List<ShortLinkGroupSortReqDTO> list){
+        groupService.sortGroup(list);
         return Results.success();
     }
 }
