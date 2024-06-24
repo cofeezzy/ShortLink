@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("com.zzy.shortLink.admin.dao.mapper")
-public class ShortLinkApplication {
+public class ShortLinkAdminApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ShortLinkApplication.class, args);
+        SpringApplication.run(ShortLinkAdminApplication.class, args);
     }
 }
