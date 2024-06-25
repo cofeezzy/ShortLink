@@ -80,6 +80,12 @@ public class ShortLinkDO extends BaseDO {
     private Date validDate;
 
     /**
+     * 网站标识
+     */
+    private String favicon;
+
+
+    /**
      * 描述
      */
     @TableField("`describe`")
