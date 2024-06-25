@@ -84,7 +84,6 @@ public class ShortLinkDO extends BaseDO {
      */
     private String favicon;
 
-
     /**
      * 描述
      */
