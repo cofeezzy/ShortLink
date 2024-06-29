@@ -15,6 +15,7 @@ import com.zzy.shortLink.admin.dto.req.UserRegisterReqDTO;
 import com.zzy.shortLink.admin.dto.req.UserUpdateReqDTO;
 import com.zzy.shortLink.admin.dto.resp.UserLoginRespDTO;
 import com.zzy.shortLink.admin.dto.resp.UserRespDTO;
+import com.zzy.shortLink.admin.service.GroupService;
 import com.zzy.shortLink.admin.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RedissonClient redissonClient;
 
     private final StringRedisTemplate stringRedisTemplate;
+
+    private final GroupService groupService;
+
     @Resource
     private final UserMapper userMapper;
 
@@ -77,6 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                     throw new ClientException(USER_EXIST);
                 }
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
+                groupService.saveGroup("默认分组");
                 return;
             }
             throw new ClientException(USER_NAME_EXIST);
