@@ -143,9 +143,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             return;
         }
         throw new ClientException("用户未登录或者token不存在！");
-
     }
-
 
     @Override
     public Boolean hasUsername(String username) {
