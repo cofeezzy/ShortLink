@@ -5,6 +5,7 @@ import com.zzy.shortLink.project.common.convention.result.Result;
 import com.zzy.shortLink.project.common.convention.result.Results;
 import com.zzy.shortLink.project.dto.req.ShortLinkCreateReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO;
+import com.zzy.shortLink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.zzy.shortLink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.zzy.shortLink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.zzy.shortLink.project.dto.resp.ShortLinkPageRespDTO;
@@ -29,6 +30,12 @@ public class ShortLinkController {
     @PostMapping("/api/short-link/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO shortLinkCreateReqDTO){
         return Results.success(shortLinkService.createShortLink(shortLinkCreateReqDTO));
+    }
+
+    @PostMapping("/api/short-link/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO reqDTO){
+        shortLinkService.updateShortLink(reqDTO);
+        return Results.success();
     }
 
     /**
