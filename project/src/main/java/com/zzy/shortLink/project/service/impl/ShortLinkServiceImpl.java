@@ -77,23 +77,23 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .eq(ShortLinkDO::getFullShortUrl, reqDTO.getFullShortUrl())
                 .eq(ShortLinkDO::getDelFlag, 0)
                 .eq(ShortLinkDO::getEnableStatus, 0);
-        ShortLinkDO hasSHortLinkDO = baseMapper.selectOne(queryWrapper);
-        if(hasSHortLinkDO == null){
+        ShortLinkDO hasShortLinkDO = baseMapper.selectOne(queryWrapper);
+        if(hasShortLinkDO == null){
             throw new ServiceException("短链接记录不存在");
         }
         ShortLinkDO shortLinkDO = ShortLinkDO.builder()
-                .domain(hasSHortLinkDO.getDomain())
-                .shortUri(hasSHortLinkDO.getShortUri())
-                .clickNum(hasSHortLinkDO.getClickNum())
-                .favicon(hasSHortLinkDO.getFavicon())
-                .createdType(hasSHortLinkDO.getCreatedType())
+                .domain(hasShortLinkDO.getDomain())
+                .shortUri(hasShortLinkDO.getShortUri())
+                .clickNum(hasShortLinkDO.getClickNum())
+                .favicon(hasShortLinkDO.getFavicon())
+                .createdType(hasShortLinkDO.getCreatedType())
                 .gid(reqDTO.getGid())
                 .originUrl(reqDTO.getOriginUrl())
                 .describe(reqDTO.getDescribe())
                 .validDateType(reqDTO.getValidDateType())
                 .validDate(reqDTO.getValidDate())
                 .build();
-        if(Objects.equals(hasSHortLinkDO.getGid(), reqDTO.getGid())){
+        if(Objects.equals(hasShortLinkDO.getGid(), reqDTO.getGid())){
             LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
                     .eq(ShortLinkDO::getFullShortUrl, reqDTO.getFullShortUrl())
                     .eq(ShortLinkDO::getGid, reqDTO.getGid())

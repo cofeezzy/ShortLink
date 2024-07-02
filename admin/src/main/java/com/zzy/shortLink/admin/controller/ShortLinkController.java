@@ -3,6 +3,7 @@ package com.zzy.shortLink.admin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.common.convention.result.Results;
+import com.zzy.shortLink.admin.dto.req.ShortLinkUpdateReqDTO;
 import com.zzy.shortLink.admin.remote.dto.ShortLinkRemoteService;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkPageReqDTO;
@@ -32,6 +33,17 @@ public class ShortLinkController {
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO shortLinkCreateReqDTO){
 
         return shortLinkRemoteService.createShortLink(shortLinkCreateReqDTO);
+    }
+
+    /**
+     * 修改短链接
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/api/short-link/admin/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO reqDTO){
+        shortLinkRemoteService.updateShortLink(reqDTO);
+        return Results.success();
     }
 
      /** 分页查询短链接
