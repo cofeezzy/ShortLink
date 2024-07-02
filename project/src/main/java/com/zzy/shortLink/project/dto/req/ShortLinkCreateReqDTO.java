@@ -47,4 +47,9 @@ public class ShortLinkCreateReqDTO {
      * 描述
      */
     private String describe;
+
+    /**
+     * 删除时间戳
+     */
+    private Long delTime;
 }
