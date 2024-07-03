@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zzy.shortLink.admin.common.convention.result.Result;
-import com.zzy.shortLink.admin.dto.req.ShortLinkUpdateReqDTO;
+import com.zzy.shortLink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkCreateRespDTO;

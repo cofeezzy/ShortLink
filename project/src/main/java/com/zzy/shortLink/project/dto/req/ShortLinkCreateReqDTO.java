@@ -12,6 +12,12 @@ import java.util.Date;
 public class ShortLinkCreateReqDTO {
     private static final long serialVersionUID = 1L;
 
+
+    /**
+     * 协议
+     */
+    private String domainProtocol;
+
     /**
      * 域名
      */

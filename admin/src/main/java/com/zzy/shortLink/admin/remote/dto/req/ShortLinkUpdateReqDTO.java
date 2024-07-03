@@ -1,4 +1,4 @@
-package com.zzy.shortLink.admin.dto.req;
+package com.zzy.shortLink.admin.remote.dto.req;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
