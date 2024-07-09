@@ -32,7 +32,7 @@ rules:
             # 分片键
             shardingColumn: username
             # 分片算法，对应 rules[0].shardingAlgorithms
-            shardingAlgorithmName: user_table_hash_mod
+            shardingAlgorithmName: group_table_hash_mod
     # 分片算法
     shardingAlgorithms:
       # 数据表分片算法
