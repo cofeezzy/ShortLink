@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.*;
+import static com.zzy.shortLink.project.toolkit.LinkUtil.getLinkCacheValidTime;
 
 /**
  * 短链接接口实现层
@@ -52,9 +53,7 @@ import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.*;
 public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLinkDO> implements ShortLinkService {
 
     private final RBloomFilter<String> shortUriCreateCacheBloomFilter;
-
     private final ShortLinkGoToMapper shortLinkGoToMapper;
-    private final ShortLinkMapper shortLinkMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
 
@@ -86,6 +85,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         }catch (DuplicateKeyException ex){
             throw new ServiceException(String.format("短链接: %s 生成重复", fullShortUrl));
         }
+        stringRedisTemplate.opsForValue().set(
+                fullShortUrl,
+                reqDTO.getOriginUrl(),
+                getLinkCacheValidTime(reqDTO.getValidDate()), TimeUnit.MILLISECONDS
+        );
         shortUriCreateCacheBloomFilter.add(fullShortUrl);
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl("http://" + shortLinkDO.getFullShortUrl())
@@ -196,7 +200,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         // 意味着第一个拿到锁的线程将会查库并且重构空缓存，但是后面的线程会重复执行第一个线程的步骤，因此在获取锁以后还需要增加一个二次判空
         boolean contains = shortUriCreateCacheBloomFilter.contains(fullShortUrl);
         if(!contains){
-            //布隆过滤器基本不会误判不存在，所以这里如果是true，说明一定不存在，开始构建缓存空值。
+            //布隆过滤器基本不会误判不存在，所以这里如果是true，说明一定不存在。
+            //如果误判存在，后续构建缓存空值
             return;
         }
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
@@ -209,6 +214,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if(StrUtil.isNotBlank(originalLink)){
                 ((HttpServletResponse) response).sendRedirect(originalLink);
+                return;
+            }
+            //二次检查空值缓存
+            gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
+            if(StrUtil.isNotBlank(gotoIsNullShortLink)){
                 return;
             }
             LambdaQueryWrapper<ShortLinkGoTODO> shortLinkGoTOQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoTODO.class)
