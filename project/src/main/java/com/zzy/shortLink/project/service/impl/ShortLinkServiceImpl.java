@@ -39,9 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
-import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
-import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY;
+import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.*;
 
 /**
  * 短链接接口实现层
@@ -56,7 +56,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final ShortLinkMapper shortLinkMapper;
     private final StringRedisTemplate stringRedisTemplate;
-    private final RedissonClient redissionClient;
+    private final RedissonClient redissonClient;
 
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO reqDTO) {
@@ -190,7 +190,20 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ((HttpServletResponse) response).sendRedirect(originalLink);
             return;
         }
-        RLock lock = redissionClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
+        //解决缓存穿透问题，通过布隆过滤器，布隆过滤器的误判可能判成存在，但是实际上数据库不存在的情况，此时还要查询数据库
+        //整体是布隆过滤器加上缓存空值两种搭配起来再加上分布式锁的解决方案
+        //最后还有一个问题：假如大量并发请求尝试看访问一个不存在的短链接，且正好被布隆过滤器误判定存在，而此时还没有缓存null，
+        // 意味着第一个拿到锁的线程将会查库并且重构空缓存，但是后面的线程会重复执行第一个线程的步骤，因此在获取锁以后还需要增加一个二次判空
+        boolean contains = shortUriCreateCacheBloomFilter.contains(fullShortUrl);
+        if(!contains){
+            //布隆过滤器基本不会误判不存在，所以这里如果是true，说明一定不存在，开始构建缓存空值。
+            return;
+        }
+        String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
+        if(StrUtil.isNotBlank(gotoIsNullShortLink)){
+            return;
+        }
+        RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
         lock.lock();
         try{
             originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
@@ -202,7 +215,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkGoTODO::getFullShortUrl, fullShortUrl);
             ShortLinkGoTODO shortLinkGoTODO = shortLinkGoToMapper.selectOne(shortLinkGoTOQueryWrapper);
             if(shortLinkGoTODO == null){
-                // 此处应该封控
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                // 此处应该风控
                 return;
             }
             LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
