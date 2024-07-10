@@ -188,8 +188,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Override
     public void restoreUri(String shortUri, ServletRequest request, ServletResponse response) {
         //判断是不是在布隆过滤器
-        String serverName = request.getServerName();
-        String fullShortUrl = serverName + "/" + shortUri;
+        String serverName = request.getServerName();String fullShortUrl = serverName + "/" + shortUri;
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if(StrUtil.isNotBlank(originalLink)){
             ((HttpServletResponse) response).sendRedirect(originalLink);
@@ -201,33 +200,37 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         // 意味着第一个拿到锁的线程将会查库并且重构空缓存，但是后面的线程会重复执行第一个线程的步骤，因此在获取锁以后还需要增加一个二次判空
         boolean contains = shortUriCreateCacheBloomFilter.contains(fullShortUrl);
         if(!contains){
-            //布隆过滤器基本不会误判不存在，所以这里如果是true，说明一定不存在。
-            //如果误判存在，后续构建缓存空值
+            //布隆过滤器基本不会误判不存在，所以这里如果是true，说明一定不存在,跳转404。
+            //如果误判存在，并查到数据库，确保不存在，那么后续构建缓存空值
+            ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if(StrUtil.isNotBlank(gotoIsNullShortLink)){
+            ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
         RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
         lock.lock();
         try{
+            //缓存击穿解决方案：锁的双重判定。防止第一次请求加载后剩余的请求也走一遍流程
             originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if(StrUtil.isNotBlank(originalLink)){
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
-            //二次检查空值缓存
+            //缓存穿透解决：同样是双重判定锁。二次检查空值缓存
             gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
             if(StrUtil.isNotBlank(gotoIsNullShortLink)){
                 return;
             }
+            //空值缓存的确不存在，走入数据库查询，先查路由表中存入的gid
             LambdaQueryWrapper<ShortLinkGoTODO> shortLinkGoTOQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoTODO.class)
                     .eq(ShortLinkGoTODO::getFullShortUrl, fullShortUrl);
             ShortLinkGoTODO shortLinkGoTODO = shortLinkGoToMapper.selectOne(shortLinkGoTOQueryWrapper);
             if(shortLinkGoTODO == null){
-                stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
-                // 此处应该风控
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
             LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
@@ -239,6 +242,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             if(shortLinkDO != null){
                 if(shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date())){
                     stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                    ((HttpServletResponse) response).sendRedirect("/page/notfound");
                     return;
                 }
                 stringRedisTemplate.opsForValue().set(
