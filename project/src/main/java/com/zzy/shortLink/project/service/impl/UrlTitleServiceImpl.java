@@ -29,6 +29,6 @@ public class UrlTitleServiceImpl implements UrlTitleService {
             Document document = Jsoup.connect(url).get();
             return document.title();
         }
-        return "Erro while fetching title";
+        return "Error while fetching title";
     }
 }
