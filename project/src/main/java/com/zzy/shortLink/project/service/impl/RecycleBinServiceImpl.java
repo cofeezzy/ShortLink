@@ -10,6 +10,7 @@ import com.zzy.shortLink.project.dao.entity.ShortLinkDO;
 import com.zzy.shortLink.project.dao.mapper.ShortLinkMapper;
 import com.zzy.shortLink.project.dto.req.RecycleBinSaveDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO;
+import com.zzy.shortLink.project.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.zzy.shortLink.project.dto.resp.ShortLinkPageRespDTO;
 import com.zzy.shortLink.project.service.RecycleBinService;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +43,13 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
     }
 
     @Override
-    public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO shortLinkPageReqDTO) {
+    public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkRecycleBinPageReqDTO shortLinkRecycleBinPageReqDTO) {
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                .eq(ShortLinkDO::getGid, shortLinkPageReqDTO.getGid())
+                .in(ShortLinkDO::getGid, shortLinkRecycleBinPageReqDTO.getGidList())
                 .eq(ShortLinkDO::getDelFlag, 0)
                 .eq(ShortLinkDO::getEnableStatus, 1)
-                .orderByDesc(ShortLinkDO::getCreateTime);
-        IPage<ShortLinkDO> resultPage = baseMapper.selectPage(shortLinkPageReqDTO, queryWrapper);
+                .orderByDesc(ShortLinkDO::getUpdateTime);
+        IPage<ShortLinkDO> resultPage = baseMapper.selectPage(shortLinkRecycleBinPageReqDTO, queryWrapper);
         return resultPage.convert(each ->{
             ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
             result.setDomain("http://" + result.getDomain());
