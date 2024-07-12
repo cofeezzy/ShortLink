@@ -110,4 +110,12 @@ public interface ShortLinkRemoteService {
     default void recoverRecycleBin(RecycleBinRecoverDTO recycleBinRecoverDTO){
         HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/recover", JSON.toJSONString(recycleBinRecoverDTO));
     };
+
+    /**
+     * 从回收站移除短链接
+     * @param recycleBinRemoveDTO
+     */
+    default void removeRecycleBin(RecycleBinRemoveDTO recycleBinRemoveDTO){
+        HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/remove", JSON.toJSONString(recycleBinRemoveDTO));
+    };
 }

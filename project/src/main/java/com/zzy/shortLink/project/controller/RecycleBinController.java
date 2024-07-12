@@ -3,10 +3,7 @@ package com.zzy.shortLink.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zzy.shortLink.project.common.convention.result.Result;
 import com.zzy.shortLink.project.common.convention.result.Results;
-import com.zzy.shortLink.project.dto.req.RecycleBinRecoverDTO;
-import com.zzy.shortLink.project.dto.req.RecycleBinSaveDTO;
-import com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO;
-import com.zzy.shortLink.project.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.zzy.shortLink.project.dto.req.*;
 import com.zzy.shortLink.project.dto.resp.ShortLinkPageRespDTO;
 import com.zzy.shortLink.project.service.RecycleBinService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +44,15 @@ public class RecycleBinController {
     @PostMapping("/api/short-link/v1/recycle-bin/recover")
     public Result<Void> recoverRecycleBin(@RequestBody RecycleBinRecoverDTO recycleBinRecoverDTO){
         recycleBinService.recoverRecycleBin(recycleBinRecoverDTO);
+        return Results.success();
+    }
+
+    /**
+     * 从回收站移除短链接
+     */
+    @PostMapping("/api/short-link/v1/recycle-bin/remove")
+    public Result<Void> removeRecycleBin(@RequestBody RecycleBinRemoveDTO recycleBinRemoveDTO){
+        recycleBinService.removeRecycleBin(recycleBinRemoveDTO);
         return Results.success();
     }
 }
