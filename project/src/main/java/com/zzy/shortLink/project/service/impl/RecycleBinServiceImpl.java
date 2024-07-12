@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zzy.shortLink.project.dao.entity.ShortLinkDO;
 import com.zzy.shortLink.project.dao.mapper.ShortLinkMapper;
+import com.zzy.shortLink.project.dto.req.RecycleBinRecoverDTO;
 import com.zzy.shortLink.project.dto.req.RecycleBinSaveDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkRecycleBinPageReqDTO;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
 
 /**
@@ -55,6 +57,22 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
             result.setDomain("http://" + result.getDomain());
             return result;
         });
+    }
+
+    @Override
+    public void recoverRecycleBin(RecycleBinRecoverDTO recycleBinRecoverDTO) {
+        LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                .eq(ShortLinkDO::getFullShortUrl, recycleBinRecoverDTO.getFullShortUrl())
+                .eq(ShortLinkDO::getEnableStatus, 1)
+                .eq(ShortLinkDO::getGid, recycleBinRecoverDTO.getGid())
+                .eq(ShortLinkDO::getDelFlag, 0);
+        ShortLinkDO shortLinkDO = ShortLinkDO.builder()
+                .enableStatus(0)
+                .build();
+        baseMapper.update(shortLinkDO, updateWrapper);
+        //从回收站恢复的文件还需要消除掉可能存在的空值缓存（如果用户已经尝试使用它那么会走跳转接口留下空值缓存）
+        stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, recycleBinRecoverDTO.getFullShortUrl()));
+
     }
 
 }

@@ -207,7 +207,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         boolean contains = shortUriCreateCacheBloomFilter.contains(fullShortUrl);
         if(!contains){
             //布隆过滤器基本不会误判不存在，所以这里如果是true，说明一定不存在,跳转404。
-            //如果误判存在，并查到数据库，确保不存在，那么后续构建缓存空值
+            //如果误判存在(或者曾经的短链接移至回收站)，查空值缓存，如果没有查到则查数据库，如果依然没有找到，那么后续构建缓存空值，如果存在，构建key
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
