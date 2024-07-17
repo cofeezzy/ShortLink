@@ -15,6 +15,9 @@ spring:
     view:
       prefix: /templates/
       suffix: .html
+  web:
+    resources:
+      static-locations: classpath:/static/
 
 mybatis-plus:
   global-config:
@@ -24,3 +27,5 @@ mybatis-plus:
       logic-not-delete-value: 0
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
