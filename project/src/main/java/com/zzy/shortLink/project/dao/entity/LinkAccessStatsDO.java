@@ -42,7 +42,7 @@ public class LinkAccessStatsDO extends BaseDO {
     private Date date;
 
     /**
-     * 访问量
+     * 访问量 page View
      */
     private Integer pv;
 
