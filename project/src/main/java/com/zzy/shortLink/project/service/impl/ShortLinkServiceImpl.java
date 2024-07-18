@@ -17,14 +17,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zzy.shortLink.project.common.convention.exception.ServiceException;
 import com.zzy.shortLink.project.common.enums.ValiDateTypeEnum;
-import com.zzy.shortLink.project.dao.entity.LinkAccessStatsDO;
-import com.zzy.shortLink.project.dao.entity.LinkLocaleStatsDO;
-import com.zzy.shortLink.project.dao.entity.ShortLinkDO;
-import com.zzy.shortLink.project.dao.entity.ShortLinkGoTODO;
-import com.zzy.shortLink.project.dao.mapper.LinkAccessStatsMapper;
-import com.zzy.shortLink.project.dao.mapper.LinkLocaleStatsMapper;
-import com.zzy.shortLink.project.dao.mapper.ShortLinkGoToMapper;
-import com.zzy.shortLink.project.dao.mapper.ShortLinkMapper;
+import com.zzy.shortLink.project.dao.entity.*;
+import com.zzy.shortLink.project.dao.mapper.*;
 import com.zzy.shortLink.project.dto.req.ShortLinkCreateReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -61,8 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.zzy.shortLink.project.common.constant.RedisKeyConstant.*;
 import static com.zzy.shortLink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
-import static com.zzy.shortLink.project.toolkit.LinkUtil.getLinkCacheValidTime;
-import static com.zzy.shortLink.project.toolkit.LinkUtil.getRealAddress;
+import static com.zzy.shortLink.project.toolkit.LinkUtil.*;
 
 /**
  * 短链接接口实现层
@@ -78,6 +71,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final RedissonClient redissonClient;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
+    private final LinkOsStatsMapper linkOsStatsMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
@@ -356,6 +350,14 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .country("中国")
                         .build();
                 linkLocaleStatsMapper.shortLinkLocaleStats(linkLocaleStatsDO);
+                LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
+                        .cnt(1)
+                        .os(getOS((HttpServletRequest) request))
+                        .date(new Date())
+                        .gid(gid)
+                        .fullShortUrl(fullShortUrl)
+                        .build();
+                linkOsStatsMapper.shortLinkStats(linkOsStatsDO);
             }
         }catch (Throwable ex){
             log.error("短链接访问量统计异常", ex);
