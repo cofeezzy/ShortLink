@@ -78,6 +78,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkAccessLogMapper linkAccessLogMapper;
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
+    private final LinkStatsTodayMapper linkStatsTodayMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
@@ -410,6 +411,25 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .build();
                 linkAccessLogMapper.insert(linkAccessLogDO);
                 baseMapper.incrementStats(1, uvFirstFlag.get()? 1 : 0, uipFirstFlag? 1 : 0, gid, fullShortUrl);
+                boolean uvTodayFirstFlag = false;
+                Long uvTodayAdd = stringRedisTemplate.opsForSet().add("short-link:stats:uv" + DateUtil.formatDate(new Date()) + ":" + fullShortUrl, uv.get());
+                if((uvTodayAdd != null && uvTodayAdd >0L)){
+                    uvTodayFirstFlag = true;
+                }
+                boolean uipTodayFirstFlag = false;
+                Long uipTodayAdd = stringRedisTemplate.opsForSet().add("short-link:stats:uip" + DateUtil.formatDate(new Date()) + ":" + fullShortUrl, remoteAddr);
+                if((uipTodayAdd != null && uipTodayAdd >0L)){
+                    uipTodayFirstFlag = true;
+                }
+                LinkStatsTodayDO todayDO = LinkStatsTodayDO.builder()
+                        .fullShortUrl(fullShortUrl)
+                        .gid(gid)
+                        .date(new Date())
+                        .todayPv(1)
+                        .todayUv(uvTodayFirstFlag? 1 : 0)
+                        .todayUip(uipTodayFirstFlag ? 1 : 0)
+                        .build();
+                linkStatsTodayMapper.shortLinkTodayStats(todayDO);
             }
         }catch (Throwable ex){
             log.error("短链接访问量统计异常", ex);

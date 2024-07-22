@@ -2,12 +2,18 @@ package com.zzy.shortLink.project.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.zzy.shortLink.project.common.database.BaseDO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @TableName("t_link_stats_today")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class LinkStatsTodayDO extends BaseDO {
 
     /**

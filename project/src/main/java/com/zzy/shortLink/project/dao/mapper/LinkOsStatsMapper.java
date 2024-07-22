@@ -17,7 +17,6 @@ public interface LinkOsStatsMapper extends BaseMapper<LinkOsStatsDO> {
 
     /**
      * 记录os访问数据
-     * @param linkOsStatsDO
      */
     @Insert("""
             INSERT INTO t_link_os_stats (full_short_url, gid, date, cnt, os, create_time, update_time, del_flag ) 
