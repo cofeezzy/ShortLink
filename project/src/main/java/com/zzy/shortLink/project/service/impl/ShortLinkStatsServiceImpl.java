@@ -30,6 +30,7 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
     private final LinkOsStatsMapper linkOsStatsMapper;
     private final LinkAccessLogMapper linkAccessLogMapper;
+    private final LinkStatsTodayMapper linkStatsTodayMapper;
 
     @Override
     public ShortLinkStatsRespDTO oneShortLinkStats(ShortLinkStatsReqDTO shortLinkStatsReqDTO) {

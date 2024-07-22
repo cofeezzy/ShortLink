@@ -409,6 +409,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .locale(StrUtil.join("-", "中国", acutalProvince, acutalCity))
                         .build();
                 linkAccessLogMapper.insert(linkAccessLogDO);
+                baseMapper.incrementStats(1, uvFirstFlag.get()? 1 : 0, uipFirstFlag? 1 : 0, gid, fullShortUrl);
             }
         }catch (Throwable ex){
             log.error("短链接访问量统计异常", ex);
