@@ -2,6 +2,7 @@ package com.zzy.shortLink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zzy.shortLink.project.dao.entity.LinkAccessStatsDO;
+import com.zzy.shortLink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsReqDTO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -37,6 +38,18 @@ public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
     List<LinkAccessStatsDO> listStatsByShortLink(@Param("param") ShortLinkStatsReqDTO statsReqDTO);
 
     /**
+     * 根据分组获取指定日期内基础监控数据
+     */
+    @Select("""
+            select date, sum(pv) as pv, sum(uv) as uv, sum(uip) as uip
+            from t_link_access_stats
+            where gid = #{param.gid}
+            and date between #{param.startDate} and #{param.endDate}
+            group by gid, date
+            """)
+    List<LinkAccessStatsDO> listStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO);
+
+    /**
      * 根据短链接获取指定日期内小时监控数据
      */
     @Select("""
@@ -49,6 +62,18 @@ public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
     List<LinkAccessStatsDO> listHourStatsByShortLink(@Param("param") ShortLinkStatsReqDTO statsReqDTO);
 
     /**
+     * 根据分组获取指定日期内小时监控数据
+     */
+    @Select("""
+            select hour, sum(pv) as pv
+            from t_link_access_stats
+            where gid = #{param.gid}
+            and date BETWEEN #{param.startDate} and #{param.endDate}
+            group by gid, date, hour
+            """)
+    List<LinkAccessStatsDO> listHourStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO);
+
+    /**
      * 根据短链接获取指定日期内星期监控数据
      */
     @Select("""
@@ -59,4 +84,17 @@ public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
             group by full_short_url, gid, date, weekday
             """)
     List<LinkAccessStatsDO> listWeekdayStatsByShortLink(@Param("param") ShortLinkStatsReqDTO statsReqDTO);
+
+
+    /**
+     * 根据分组获取指定日期内星期监控数据
+     */
+    @Select("""
+            select weekday, sum(pv) as pv
+            from t_link_access_stats
+            where gid = #{param.gid}
+            and date BETWEEN #{param.startDate} and #{param.endDate}
+            group by gid, date, weekday
+    """)
+    List<LinkAccessStatsDO> listWeekdayStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO);
 }

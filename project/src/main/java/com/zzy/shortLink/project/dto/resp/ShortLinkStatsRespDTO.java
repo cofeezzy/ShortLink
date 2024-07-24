@@ -29,7 +29,7 @@ public class ShortLinkStatsRespDTO {
     private Integer uip;
 
     /**
-     * 基础访问详情
+     * 每日访问详情
      */
     private List<ShortLinkStatsAccessDailyRespDTO> daily;
 

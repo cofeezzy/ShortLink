@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.dto.req.RecycleBinSaveDTO;
+import com.zzy.shortLink.admin.dto.req.ShortLinkGroupStatsReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.*;
 import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
@@ -132,4 +133,11 @@ public interface ShortLinkRemoteService {
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {
         });
     }
+
+    default Result<ShortLinkStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO){
+        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/group", BeanUtil.beanToMap(shortLinkGroupStatsReqDTO));
+        return JSON.parseObject(s, new TypeReference<>() {
+        });
+    }
+
 }
