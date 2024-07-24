@@ -1,11 +1,16 @@
 package com.zzy.shortLink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.zzy.shortLink.project.dao.entity.*;
 import com.zzy.shortLink.project.dao.mapper.*;
+import com.zzy.shortLink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsReqDTO;
 import com.zzy.shortLink.project.dto.resp.*;
@@ -13,10 +18,7 @@ import com.zzy.shortLink.project.service.ShortLinkStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -34,8 +36,38 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public ShortLinkStatsRespDTO oneShortLinkStats(ShortLinkStatsReqDTO shortLinkStatsReqDTO) {
-        //基础访问详情
         List<LinkAccessStatsDO> listStatsByShortLink = linkAccessStatsMapper.listStatsByShortLink(shortLinkStatsReqDTO);
+        if(CollUtil.isEmpty(listStatsByShortLink)){
+            return null;
+        }
+        //基础访问数据
+        LinkAccessStatsDO pvUvUipStatsByShortLink = linkAccessLogMapper.findPvUvUipStatsByShortLink(shortLinkStatsReqDTO);
+
+        //基础访问详情
+        List<ShortLinkStatsAccessDailyRespDTO> daily = new ArrayList<>();
+        List<String> rangeDates = DateUtil.rangeToList(DateUtil.parse(shortLinkStatsReqDTO.getStartDate()), DateUtil.parse(shortLinkStatsReqDTO.getEndDate()), DateField.DAY_OF_MONTH).stream()
+                .map(DateUtil::formatDate)
+                .toList();
+        rangeDates.forEach(each -> listStatsByShortLink.stream()
+                .filter(item -> Objects.equals(DateUtil.formatDate(item.getDate()), each))
+                .findFirst()
+                .ifPresentOrElse(item -> {
+                    ShortLinkStatsAccessDailyRespDTO dailyRespDTO = ShortLinkStatsAccessDailyRespDTO.builder()
+                            .date(each)
+                            .pv(item.getPv())
+                            .uv(item.getUv())
+                            .uip(item.getUip())
+                            .build();
+                    daily.add(dailyRespDTO);
+                }, ()->{
+                    ShortLinkStatsAccessDailyRespDTO dailyRespDTO = ShortLinkStatsAccessDailyRespDTO.builder()
+                            .date(each)
+                            .pv(0)
+                            .uv(0)
+                            .uip(0)
+                            .build();
+                    daily.add(dailyRespDTO);
+                }));
 
         //地区访问详情
         List<ShortLinkStatsLocaleCNRespDTO> listLocaleStats = new ArrayList<>();
@@ -188,7 +220,10 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
         });
 
         return ShortLinkStatsRespDTO.builder()
-                .daily(BeanUtil.copyToList(listStatsByShortLink, ShortLinkStatsAccessDailyRespDTO.class))
+                .daily(daily)
+                .pv(pvUvUipStatsByShortLink.getPv())
+                .uv(pvUvUipStatsByShortLink.getUv())
+                .uip(pvUvUipStatsByShortLink.getUip())
                 .browserStats(browserRespDTOS)
                 .deviceStats(deviceRespDTOS)
                 .hourStats(hourStats)
@@ -217,22 +252,35 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
         List<String> accessLogUsers = convertResult.getRecords().stream()
                 .map(ShortLinkStatsAccessRecordRespDTO::getUser)
                 .toList();
-        List<HashMap<String, Object>> uvTypeList = linkAccessLogMapper.selectUvTypeByUsers(
+        if(CollectionUtil.isEmpty(accessLogUsers)){
+            return convertResult;
+        }
+        List<Map<String, Object>> uvTypeList = linkAccessLogMapper.selectUvTypeByUsers(
                 accessRecordReqDTO.getGid(),
                 accessRecordReqDTO.getFullShortUrl(),
                 accessRecordReqDTO.getStartDate(),
                 accessRecordReqDTO.getEndDate(),
                 accessLogUsers);
+
         convertResult.getRecords().stream().forEach(each ->{
             String uvType = uvTypeList.stream()
                     .filter(item -> Objects.equals(item.get("user"), each.getUser()))
                     .findFirst()
-                    .map(item -> item.get("UvType"))
+                    .map(item -> item.get("uvType"))
                     .map(Object::toString)
                     .orElse("旧访客");
             each.setUvType(uvType);
         });
         return convertResult;
+    }
+
+    @Override
+    public ShortLinkStatsRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO) {
+        List<LinkAccessStatsDO> linkAccessStatsDOS = linkAccessStatsMapper.listStatsByGroup(shortLinkGroupStatsReqDTO);
+        if(CollUtil.isEmpty(linkAccessStatsDOS)){
+            return null;
+        }
+        return null;
     }
 
 

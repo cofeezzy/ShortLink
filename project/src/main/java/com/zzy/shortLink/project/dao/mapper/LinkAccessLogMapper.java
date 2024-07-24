@@ -2,12 +2,14 @@ package com.zzy.shortLink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zzy.shortLink.project.dao.entity.LinkAccessLogDO;
+import com.zzy.shortLink.project.dao.entity.LinkAccessStatsDO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsReqDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 访问日志持久层
@@ -59,9 +61,21 @@ public interface LinkAccessLogMapper extends BaseMapper<LinkAccessLogDO> {
             "GROUP BY " +
             "    user;" +
             "    </script>")
-    List<HashMap<String, Object>> selectUvTypeByUsers(@Param("gid") String gid,
-                                                      @Param("fullShortUrl") String fullShortUrl,
-                                                      @Param("startDate") String startDate,
-                                                      @Param("endDate") String endDate,
-                                                      @Param("accessLogUsers") List<String> accessLogUsers);
+    List<Map<String, Object>> selectUvTypeByUsers(@Param("gid") String gid,
+                                                  @Param("fullShortUrl") String fullShortUrl,
+                                                  @Param("startDate") String startDate,
+                                                  @Param("endDate") String endDate,
+                                                  @Param("accessLogUsers") List<String> accessLogUsers);
+
+    /**
+     * 根据短链接获取指定日期内的PV,UV,UIP数据
+     */
+    @Select("""
+            select  COUNT(user) as pv, COUNT(distinct user) as uv, COUNT(distinct ip) as uip
+            from t_link_access_logs
+            where full_short_url = #{param.fullShortUrl} and gid = #{param.gid}
+            AND create_time BETWEEN CONCAT(#{param.startDate},' 00:00:00') and CONCAT(#{param.endDate},' 23:59:59')
+            group by full_short_url, gid;
+            """)
+    LinkAccessStatsDO findPvUvUipStatsByShortLink(@Param("param") ShortLinkStatsReqDTO statsReqDTO);
 }

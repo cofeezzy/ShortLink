@@ -188,16 +188,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO shortLinkPageReqDTO) {
-        // 使用log4j或其他日志框架打印日志
-        // 添加日志打印
-        logger.info("Executing getPageLink with parameters: gid={}, size={}, orderTag={}",
-                shortLinkPageReqDTO.getGid(), shortLinkPageReqDTO.getSize(), shortLinkPageReqDTO.getOrderTag());
-
         IPage<ShortLinkDO> resultPage = baseMapper.pageLink(shortLinkPageReqDTO);
-
-        // 打印查询结果
-        logger.info("Result of getPageLink: {}", resultPage.getRecords());
-
         return resultPage.convert(each -> {
             ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
             result.setDomain("http://" + result.getDomain());
@@ -417,14 +408,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .locale(StrUtil.join("-", "中国", acutalProvince, acutalCity))
                         .build();
                 linkAccessLogMapper.insert(linkAccessLogDO);
+                //主要是更新新添加的字段也就是total数据
                 baseMapper.incrementStats(1, uvFirstFlag.get()? 1 : 0, uipFirstFlag? 1 : 0, gid, fullShortUrl);
                 boolean uvTodayFirstFlag = false;
-                Long uvTodayAdd = stringRedisTemplate.opsForSet().add("short-link:stats:uv" + DateUtil.formatDate(new Date()) + ":" + fullShortUrl, uv.get());
+                Long uvTodayAdd = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + DateUtil.formatDate(new Date()) + ":" + fullShortUrl, uv.get());
                 if((uvTodayAdd != null && uvTodayAdd >0L)){
                     uvTodayFirstFlag = true;
                 }
                 boolean uipTodayFirstFlag = false;
-                Long uipTodayAdd = stringRedisTemplate.opsForSet().add("short-link:stats:uip" + DateUtil.formatDate(new Date()) + ":" + fullShortUrl, remoteAddr);
+                Long uipTodayAdd = stringRedisTemplate.opsForSet().add("short-link:stats:uip:" + DateUtil.formatDate(new Date()) + ":" + fullShortUrl, remoteAddr);
                 if((uipTodayAdd != null && uipTodayAdd >0L)){
                     uipTodayFirstFlag = true;
                 }
