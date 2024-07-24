@@ -19,8 +19,6 @@ import java.util.Date;
 @NoArgsConstructor
 @TableName("t_link")
 public class ShortLinkDO extends BaseDO {
-    private static final long serialVersionUID = 1L;
-
     /**
      * id
      */
@@ -104,6 +102,24 @@ public class ShortLinkDO extends BaseDO {
      * 历史UIP
      */
     private Integer totalUip;
+
+    /**
+     * 今日PV
+     */
+    @TableField(exist = false)
+    private Integer todayPv;
+
+    /**
+     * 今日UV
+     */
+    @TableField(exist = false)
+    private Integer todayUv;
+
+    /**
+     * 今日UIP
+     */
+    @TableField(exist = false)
+    private Integer todayUip;
 
     /**
      * 删除时间戳

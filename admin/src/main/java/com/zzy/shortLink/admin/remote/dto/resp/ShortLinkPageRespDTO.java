@@ -101,4 +101,5 @@ public class ShortLinkPageRespDTO {
      * 历史UIP
      */
     private Integer totalUip;
+
 }
