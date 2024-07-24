@@ -9,10 +9,7 @@ import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.dto.req.RecycleBinSaveDTO;
 import com.zzy.shortLink.admin.dto.req.ShortLinkGroupStatsReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.*;
-import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
-import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
-import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
+import com.zzy.shortLink.admin.remote.dto.resp.*;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
@@ -134,10 +131,36 @@ public interface ShortLinkRemoteService {
         });
     }
 
+    /**
+     *  访问分组短链接指定时间内监控数据
+     * @param shortLinkGroupStatsReqDTO
+     * @return
+     */
     default Result<ShortLinkStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO){
         String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/group", BeanUtil.beanToMap(shortLinkGroupStatsReqDTO));
         return JSON.parseObject(s, new TypeReference<>() {
         });
     }
 
+    default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO accessRecordReqDTO){
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(accessRecordReqDTO, false, true);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record", stringObjectMap);
+        return JSON.parseObject(s, new TypeReference<>() {
+        });
+    };
+    /**
+     *  访问分组短链接指定时间内访问数据
+     * @param groupStatsAccessRecordReqDTO
+     * @return
+     */
+    default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO groupStatsAccessRecordReqDTO){
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(groupStatsAccessRecordReqDTO, false, true);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record/group", stringObjectMap);
+        return JSON.parseObject(s, new TypeReference<>() {
+        });
+    };
 }

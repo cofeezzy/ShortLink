@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.zzy.shortLink.project.dao.entity.*;
 import com.zzy.shortLink.project.dao.mapper.*;
+import com.zzy.shortLink.project.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsReqDTO;
@@ -473,6 +474,42 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
                 .uvTypeStats(uvTypeRespDTOS)
                 .networkStats(networkRespDTOS)
                 .build();
+    }
+
+    @Override
+    public IPage<ShortLinkStatsAccessRecordRespDTO> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO groupStatsAccessRecordReqDTO) {
+        groupStatsAccessRecordReqDTO.setStartDate(groupStatsAccessRecordReqDTO.getStartDate() + " 00:00:00");
+        groupStatsAccessRecordReqDTO.setEndDate(groupStatsAccessRecordReqDTO.getEndDate() + " 23:59:59");
+        LambdaQueryWrapper<LinkAccessLogDO> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogDO.class)
+                .eq(LinkAccessLogDO::getGid, groupStatsAccessRecordReqDTO.getGid())
+                .between(LinkAccessLogDO::getCreateTime, groupStatsAccessRecordReqDTO.getStartDate(), groupStatsAccessRecordReqDTO.getEndDate())
+                .eq(LinkAccessLogDO::getDelFlag, 0)
+                .orderByDesc(LinkAccessLogDO::getCreateTime);
+
+        IPage<LinkAccessLogDO> linkAccessLogDOIPage = linkAccessLogMapper.selectPage(groupStatsAccessRecordReqDTO, queryWrapper);
+        IPage<ShortLinkStatsAccessRecordRespDTO> convertResult = linkAccessLogDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDTO.class));
+        List<String> accessLogUsers = convertResult.getRecords().stream()
+                .map(ShortLinkStatsAccessRecordRespDTO::getUser)
+                .toList();
+        if(CollectionUtil.isEmpty(accessLogUsers)){
+            return convertResult;
+        }
+        List<Map<String, Object>> uvTypeList = linkAccessLogMapper.selectGroupUvTypeByUsers(
+                groupStatsAccessRecordReqDTO.getGid(),
+                groupStatsAccessRecordReqDTO.getStartDate(),
+                groupStatsAccessRecordReqDTO.getEndDate(),
+                accessLogUsers);
+
+        convertResult.getRecords().stream().forEach(each ->{
+            String uvType = uvTypeList.stream()
+                    .filter(item -> Objects.equals(item.get("user"), each.getUser()))
+                    .findFirst()
+                    .map(item -> item.get("uvType"))
+                    .map(Object::toString)
+                    .orElse("旧访客");
+            each.setUvType(uvType);
+        });
+        return convertResult;
     }
 
 

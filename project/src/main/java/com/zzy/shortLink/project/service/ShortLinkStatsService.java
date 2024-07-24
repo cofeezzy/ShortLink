@@ -1,6 +1,7 @@
 package com.zzy.shortLink.project.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zzy.shortLink.project.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkStatsReqDTO;
@@ -28,8 +29,15 @@ public interface ShortLinkStatsService {
 
     /**
      * 获取短链接分组监控数据
-     * @param shortLinkGroupStatsReqDTO
-     * @return
+     * @param shortLinkGroupStatsReqDTO 获取短链接监控数据
+     * @return 分组监控数据
      */
     ShortLinkStatsRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO shortLinkGroupStatsReqDTO);
+
+    /**
+     * 获取短链接分组指定时间内访问记录监控数据
+     * @param groupStatsAccessRecordReqDTO 获取分组短链接指定时间访问记录参数
+     * @return 分组访问数据
+     */
+    IPage<ShortLinkStatsAccessRecordRespDTO> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO groupStatsAccessRecordReqDTO);
 }
