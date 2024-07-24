@@ -21,10 +21,7 @@
 <!--    分页查询短链接-->
     <select id="pageLink" parameterType="com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO"
             resultType="com.zzy.shortLink.project.dao.entity.ShortLinkDO">
-        SELECT t.id, t.domain, t.short_uri, t.full_short_url, t.origin_url,
-        t.create_time, t.click_num, t.gid, t.enable_status, t.created_type,
-        t.valid_date_type, t.valid_date, t.favicon, t.`describe`, t.total_pv,
-        t.total_uv, t.total_uip, t.update_time, t.del_flag, t.del_time,
+        SELECT t.*,
         COALESCE(s.today_pv, 0) AS todayPv,
         COALESCE(s.today_uv, 0) AS todayUv,
         COALESCE(s.today_uip, 0) AS todayUip
