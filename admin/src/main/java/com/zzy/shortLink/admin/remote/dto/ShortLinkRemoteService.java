@@ -142,6 +142,11 @@ public interface ShortLinkRemoteService {
         });
     }
 
+    /**
+     *  访问短链接指定时间内访问数据
+     * @param accessRecordReqDTO
+     * @return
+     */
     default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO accessRecordReqDTO){
         Map<String, Object> stringObjectMap = BeanUtil.beanToMap(accessRecordReqDTO, false, true);
         stringObjectMap.remove("orders");
@@ -163,4 +168,15 @@ public interface ShortLinkRemoteService {
         return JSON.parseObject(s, new TypeReference<>() {
         });
     };
+
+    /**
+     *  批量创建短链接
+     * @param batchCreateReqDTO
+     * @return
+     */
+    default Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(ShortLinkBatchCreateReqDTO batchCreateReqDTO){
+        String s = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/create/batch", JSON.toJSONString(batchCreateReqDTO));
+        return JSON.parseObject(s, new TypeReference<>() {
+        });
+    }
 }

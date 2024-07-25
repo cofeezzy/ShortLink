@@ -1,7 +1,10 @@
 package com.zzy.shortLink.project.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,8 +12,10 @@ import java.util.Date;
  * 短链接创建实体请求
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ShortLinkCreateReqDTO {
-    private static final long serialVersionUID = 1L;
     /**
      * 域名
      */
