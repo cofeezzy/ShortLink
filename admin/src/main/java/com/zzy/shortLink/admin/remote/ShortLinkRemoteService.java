@@ -1,4 +1,4 @@
-package com.zzy.shortLink.admin.remote.dto;
+package com.zzy.shortLink.admin.remote;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.http.HttpUtil;
@@ -20,42 +20,6 @@ import java.util.Map;
  * 短链接中台远程调用服务
  */
 public interface ShortLinkRemoteService {
-
-    /**
-     * 创建短链接
-     * @param shortLinkCreateReqDTO 创建短链接请求参数
-     * @return
-     */
-    default Result<ShortLinkCreateRespDTO> createShortLink(ShortLinkCreateReqDTO shortLinkCreateReqDTO){
-        String resultBodyStr = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/create", JSON.toJSONString(shortLinkCreateReqDTO));
-        return JSON.parseObject(resultBodyStr, new TypeReference<>() {
-        });
-    }
-
-    /**
-     * 修改短链接
-     * @param reqDTO 修改短链接请求参数
-     * @return
-     */
-    default void updateShortLink(ShortLinkUpdateReqDTO reqDTO){
-       HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update", JSON.toJSONString(reqDTO));
-    };
-
-    /**
-     * 分页查询短链接
-     * @param shortLinkPageReqDTO 分页查询短链接请求参数
-     * @return
-     */
-    default Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO shortLinkPageReqDTO){
-        Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("gid", shortLinkPageReqDTO.getGid());
-        requestMap.put("orderTag", shortLinkPageReqDTO.getOrderTag());
-        requestMap.put("current", shortLinkPageReqDTO.getCurrent());
-        requestMap.put("size", shortLinkPageReqDTO.getSize());
-        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/page", requestMap);
-        return JSON.parseObject(resultPageStr, new TypeReference<>(){
-        });
-    }
 
     /**
      * 查询分组短链接总量
@@ -165,17 +129,6 @@ public interface ShortLinkRemoteService {
         stringObjectMap.remove("orders");
         stringObjectMap.remove("records");
         String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record/group", stringObjectMap);
-        return JSON.parseObject(s, new TypeReference<>() {
-        });
-    };
-
-    /**
-     *  批量创建短链接
-     * @param batchCreateReqDTO
-     * @return
-     */
-    default Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(ShortLinkBatchCreateReqDTO batchCreateReqDTO){
-        String s = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/create/batch", JSON.toJSONString(batchCreateReqDTO));
         return JSON.parseObject(s, new TypeReference<>() {
         });
     }

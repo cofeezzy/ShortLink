@@ -3,7 +3,7 @@ package com.zzy.shortLink.admin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.dto.req.ShortLinkGroupStatsReqDTO;
-import com.zzy.shortLink.admin.remote.dto.ShortLinkRemoteService;
+import com.zzy.shortLink.admin.remote.ShortLinkRemoteService;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkStatsReqDTO;

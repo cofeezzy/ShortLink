@@ -2,7 +2,7 @@ package com.zzy.shortLink.admin.controller;
 
 
 import com.zzy.shortLink.admin.common.convention.result.Result;
-import com.zzy.shortLink.admin.remote.dto.ShortLinkRemoteService;
+import com.zzy.shortLink.admin.remote.ShortLinkRemoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

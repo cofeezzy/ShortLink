@@ -12,10 +12,12 @@ import com.zzy.shortLink.admin.dao.mapper.GroupMapper;
 import com.zzy.shortLink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.zzy.shortLink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.zzy.shortLink.admin.dto.resp.ShortLinkGroupRespDTO;
-import com.zzy.shortLink.admin.remote.dto.ShortLinkRemoteService;
+import com.zzy.shortLink.admin.remote.ShortLinkActualRemoteService;
+import com.zzy.shortLink.admin.remote.ShortLinkRemoteService;
 import com.zzy.shortLink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.zzy.shortLink.admin.service.GroupService;
 import com.zzy.shortLink.admin.toolkit.RandomGenerator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,10 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     /**
      * 后续需要重构成Spring cloud feign
@@ -65,7 +70,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getDelFlag, 0)
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
-        Result<List<ShortLinkGroupCountQueryRespDTO>> listResult = shortLinkRemoteService
+        Result<List<ShortLinkGroupCountQueryRespDTO>> listResult = shortLinkActualRemoteService
                 .listGroupShortLinkCount(groupDOList.stream().map(GroupDO::getGid).toList());
         List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOS = BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
         shortLinkGroupRespDTOS.forEach(each->{

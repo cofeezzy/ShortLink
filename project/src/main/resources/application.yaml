@@ -1,12 +1,13 @@
 server:
   port: 8001
 spring:
+  application:
+    name: short-link-project
   datasource:
     # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     # ShardingSphere 配置文件路径
     url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
-
   data:
     redis:
       host: 127.0.0.1
@@ -18,6 +19,11 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
 
 mybatis-plus:
   global-config:
