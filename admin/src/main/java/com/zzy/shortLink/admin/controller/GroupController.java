@@ -31,7 +31,7 @@ public class GroupController {
     }
 
     /**
-     * c查询短链接分组集合
+     * 查询短链接分组集合
      */
     @GetMapping("/api/short-link/admin/v1/group")
     public Result<List<ShortLinkGroupRespDTO>> listGroup(){

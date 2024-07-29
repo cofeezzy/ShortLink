@@ -3,6 +3,7 @@ package com.zzy.shortLink.project.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zzy.shortLink.project.dao.entity.ShortLinkDO;
+import com.zzy.shortLink.project.dto.biz.ShortLinkStatsRecordDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkCreateReqDTO;
 import com.zzy.shortLink.project.dto.req.ShortLinkPageReqDTO;
@@ -64,4 +65,6 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @return 响应
      */
     ShortLinkBatchCreateRespDTO createShortLinkBatch(ShortLinkBatchCreateReqDTO batchCreateReqDTO);
+
+    void shortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecordDTO);
 }

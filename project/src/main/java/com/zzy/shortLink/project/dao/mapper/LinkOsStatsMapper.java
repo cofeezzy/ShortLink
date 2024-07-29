@@ -24,7 +24,7 @@ public interface LinkOsStatsMapper extends BaseMapper<LinkOsStatsDO> {
             VALUES( #{linkOsStats.fullShortUrl}, #{linkOsStats.gid}, #{linkOsStats.date}, #{linkOsStats.cnt},  #{linkOsStats.os}, NOW(), NOW(), 0 ) ON DUPLICATE KEY UPDATE
             cnt = cnt + #{linkOsStats.cnt};
             """)
-    void shortLinkStats(@Param("linkOsStats") LinkOsStatsDO linkOsStatsDO);
+    void shortLinkOsStats(@Param("linkOsStats") LinkOsStatsDO linkOsStatsDO);
 
     /**
      * 根据短链接获取指定日期内的操作系统监控数据
