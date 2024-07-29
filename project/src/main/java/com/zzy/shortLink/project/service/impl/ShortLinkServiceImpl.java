@@ -17,8 +17,10 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zzy.shortLink.project.common.convention.exception.ClientException;
 import com.zzy.shortLink.project.common.convention.exception.ServiceException;
 import com.zzy.shortLink.project.common.enums.ValiDateTypeEnum;
+import com.zzy.shortLink.project.config.GotoDomainWhiteListConfiguration;
 import com.zzy.shortLink.project.dao.entity.*;
 import com.zzy.shortLink.project.dao.mapper.*;
 import com.zzy.shortLink.project.dto.biz.ShortLinkStatsRecordDTO;
@@ -31,6 +33,7 @@ import com.zzy.shortLink.project.mq.producer.DelayShortLinkStatsProducer;
 import com.zzy.shortLink.project.service.LinkStatsTodayService;
 import com.zzy.shortLink.project.service.ShortLinkService;
 import com.zzy.shortLink.project.toolkit.HashUtil;
+import com.zzy.shortLink.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
@@ -85,6 +88,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkStatsTodayMapper linkStatsTodayMapper;
     private final LinkStatsTodayService linkStatsTodayService;
     private final DelayShortLinkStatsProducer delayShortLinkStatsProducer;
+    private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
@@ -94,6 +98,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO reqDTO) {
+        verificationWhitelist(reqDTO.getOriginUrl());
         String shortLinkSuffix = generateSuffix(reqDTO);
         String fullShortUrl = StrBuilder.create(createShortLinkDefaultDomain)
                 .append("/")
@@ -167,6 +172,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateShortLink(ShortLinkUpdateReqDTO reqDTO) {
+        verificationWhitelist(reqDTO.getOriginUrl());
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                 .eq(ShortLinkDO::getGid, reqDTO.getOriginGid())
                 .eq(ShortLinkDO::getFullShortUrl, reqDTO.getFullShortUrl())
@@ -215,7 +221,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 ShortLinkDO shortLinkDO = ShortLinkDO.builder()
                         .domain(hasShortLinkDO.getDomain())
                         .shortUri(hasShortLinkDO.getShortUri())
-                        .favicon(hasShortLinkDO.getFavicon())
+                        .favicon(getFavicon(reqDTO.getOriginUrl()))
                         .createdType(hasShortLinkDO.getCreatedType())
                         .gid(reqDTO.getGid())
                         .originUrl(reqDTO.getOriginUrl())
@@ -224,6 +230,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .validDate(reqDTO.getValidDate())
                         .fullShortUrl(hasShortLinkDO.getFullShortUrl())
                         .delTime(0L)
+                        .enableStatus(hasShortLinkDO.getEnableStatus())
+                        .totalPv(hasShortLinkDO.getTotalPv())
+                        .totalUv(hasShortLinkDO.getTotalUv())
+                        .totalUip(hasShortLinkDO.getTotalUip())
                         .build();
                 baseMapper.insert(shortLinkDO);
                 LambdaQueryWrapper<LinkStatsTodayDO> statsTodayDOLambdaQueryWrapper = Wrappers.lambdaQuery(LinkStatsTodayDO.class)
@@ -240,7 +250,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 }
                 LambdaQueryWrapper<ShortLinkGoTODO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoTODO.class)
                         .eq(ShortLinkGoTODO::getFullShortUrl, reqDTO.getFullShortUrl())
-                        .eq(ShortLinkGoTODO::getGid, reqDTO.getGid());
+                        .eq(ShortLinkGoTODO::getGid, hasShortLinkDO.getGid());
                 ShortLinkGoTODO shortLinkGoTODO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
                 shortLinkGoToMapper.deleteById(shortLinkGoTODO.getId());
                 shortLinkGoTODO.setGid(reqDTO.getGid());
@@ -613,5 +623,20 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             }
         }
         return null;
+    }
+
+    private void verificationWhitelist(String originUrl) {
+        Boolean enable = gotoDomainWhiteListConfiguration.getEnable();
+        if (enable == null || !enable) {
+            return;
+        }
+        String domain = LinkUtil.extractDomain(originUrl);
+        if (StrUtil.isBlank(domain)) {
+            throw new ClientException("跳转链接填写错误");
+        }
+        List<String> details = gotoDomainWhiteListConfiguration.getDetails();
+        if (!details.contains(domain)) {
+            throw new ClientException("演示环境为避免恶意攻击，请生成以下网站跳转链接：" + gotoDomainWhiteListConfiguration.getNames());
+        }
     }
 }
