@@ -29,8 +29,7 @@ public class UserTransmitFilter implements Filter {
 
     private static final List<String> IGNORE_URI = Lists.newArrayList(
             "/api/short-link/admin/v1/user/login",
-            "/api/short-link/admin/v1/user/has-username",
-            "/api/short-link/admin/v1/title"
+            "/api/short-link/admin/v1/user/has-username"
     );
 
     @SneakyThrows
