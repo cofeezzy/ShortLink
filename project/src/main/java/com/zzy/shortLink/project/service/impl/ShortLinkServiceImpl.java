@@ -599,7 +599,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             String originalUrl = reqDTO.getOriginUrl();
             originalUrl += System.currentTimeMillis(); //最大化避免冲突
             shortUri = HashUtil.hashToBase62(originalUrl);
-            if(!shortUriCreateCacheBloomFilter.contains(reqDTO.getDomain() + "/" + shortUri)){
+            if(!shortUriCreateCacheBloomFilter.contains(createShortLinkDefaultDomain + "/" + shortUri)){
                 break;
             }
             customGenerateCount++;
