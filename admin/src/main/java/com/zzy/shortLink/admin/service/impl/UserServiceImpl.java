@@ -1,6 +1,7 @@
 package com.zzy.shortLink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -27,6 +28,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -112,10 +114,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if(userDO == null){
             throw new ClientException(UserErrorCodeEnum.USER_NULL);
         }
-        Boolean isLogin = stringRedisTemplate.hasKey("login_" + requestParam.getUsername());
+        Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries("login_" + requestParam.getUsername());
 
-        if(isLogin != null && isLogin){
-            throw new ClientException("用户已登录");
+        if(CollUtil.isNotEmpty(hasLoginMap)){
+            return new UserLoginRespDTO(hasLoginMap.keySet().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElseThrow(() -> new ClientException("用户登录错误")) );
         }
 
         /**
@@ -125,7 +130,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
          *   Key:token标识
          *   Val:JSON字符串(用户信息)
          */
-
         String uuid = UUID.randomUUID().toString();
         stringRedisTemplate.opsForHash().put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
         stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30L, TimeUnit.DAYS);
