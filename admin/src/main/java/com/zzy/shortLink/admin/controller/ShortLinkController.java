@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zzy.shortLink.admin.common.convention.result.Result;
 import com.zzy.shortLink.admin.common.convention.result.Results;
 import com.zzy.shortLink.admin.remote.ShortLinkActualRemoteService;
-import com.zzy.shortLink.admin.remote.ShortLinkRemoteService;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkBatchCreateReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.zzy.shortLink.admin.remote.dto.req.ShortLinkPageReqDTO;
@@ -33,12 +32,6 @@ public class ShortLinkController {
     private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     /**
-     * 后续需要重构成Spring cloud feign
-     */
-    ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService(){
-    };
-
-    /**
      * 创建
      */
     @PostMapping("/api/short-link/admin/v1/create")
@@ -60,8 +53,6 @@ public class ShortLinkController {
 
     /**
      * 修改短链接
-     * @param reqDTO
-     * @return
      */
     @PostMapping("/api/short-link/admin/v1/update")
     public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO reqDTO){
@@ -69,9 +60,8 @@ public class ShortLinkController {
         return Results.success();
     }
 
-     /** 分页查询短链接
-     * @param shortLinkPageReqDTO
-     * @return
+     /**
+      * 分页查询短链接
      */
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<Page<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO shortLinkPageReqDTO){

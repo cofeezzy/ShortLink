@@ -79,7 +79,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkOsStatsMapper linkOsStatsMapper;
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
     private final LinkAccessLogMapper linkAccessLogMapper;
-    private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
     private final LinkStatsTodayMapper linkStatsTodayMapper;
     private final LinkStatsTodayService linkStatsTodayService;
@@ -471,6 +470,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .uipFirstFlag(uipFirstFlag)
                 .uv(uv.get())
                 .uvFirstFlag(uvFirstFlag.get())
+                .currentDate(new Date())
                 .build();
     }
 
